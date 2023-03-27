@@ -33,7 +33,6 @@ export function RegisterPage(){
         }
         
         try {
-            console.log(data)
             const response =  await api.post('/users', data);
             toast.success('Cadastro realizado com sucesso!', {
                 position: "top-right",
@@ -46,7 +45,7 @@ export function RegisterPage(){
                 });
         } catch (error) {
             console.error(error);
-            toast.error('Ops! Esse e-mail já está sendo utilizado', {
+            toast.error('Ops! Algo deu errado', {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,

@@ -74,6 +74,7 @@ export const Container = styled.main`
         top: 20%;
         transition: 1s;  
     }
+
     
 `
 export const Box = styled.div`
@@ -181,9 +182,13 @@ export const Contacts = styled.div`
     margin-bottom: 40px;
     display: flex;
     flex-direction: column;
+    width: 100%;
     h2{
         margin: 0 auto;
         margin-top: 15px;
+    }
+    .contatos{
+        width: 100%;
     }
     div{
         margin-top: 20px;
@@ -212,8 +217,10 @@ export const Contacts = styled.div`
         background-color: red;
         border: none;
         color: white;
-        border-radius: 10px 0 0 10px;
+        border-radius: 25px;
         margin: 0;
+        margin-left: auto;
+        margin-right: 10px;
     }
 `
 export const Products = styled.div`

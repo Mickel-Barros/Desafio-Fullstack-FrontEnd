@@ -8,7 +8,11 @@ import { useState } from "react";
 import { useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import {useNavigate} from "react-router-dom";
-
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { removerContato } from "../../functions";
 
 function modal(){
     const form = document.querySelector(".modal")
@@ -40,26 +44,74 @@ export function UserPage(){
             }})
         .then((response) => {
             const decoded = jwt_decode(token)
-            const currentUser = response.data.results.find((user) => user.id === decoded.user_id);
+            const currentUser = response.data.find((user) => user.id === +decoded.sub);
             setUser(currentUser)
-            
         })
     }, [])
-    useEffect(() => {
-        const token = localStorage.getItem('Token');
-        api
-        .get(`/products/`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }})
-        .then((response) => {
-            const decoded = jwt_decode(token)
-            for (let i in response.data.results){
-                if (response.data.results[i].seller.id === decoded.user_id)
-                    setProducts([...response.data.results])
-            }
-        })
-    }, [])
+    
+
+
+    const formSchemaRegister = yup.object().shape({
+        name: yup.string().notRequired(),
+        img: yup.string().notRequired(),
+        bio: yup.string().notRequired(),
+        email: yup.string().notRequired(),
+        phone: yup.string().notRequired()
+    })
+    const {register, handleSubmit, formState: { errors }} = useForm({
+        resolver: yupResolver(formSchemaRegister)
+    })
+    async function onSubmitFunctionRegister(obj){
+        const token = localStorage.getItem('Token')
+        const decoded = jwt_decode(token)
+        if(obj.name === ''){
+            delete obj.name
+        }
+        if(obj.img === ''){
+            delete obj.img
+        }
+        if(obj.bio === ''){
+            delete obj.bio
+        }
+        if(obj.email === ''){
+            delete obj.email
+        }
+        if(obj.phone === ''){
+            delete obj.phone
+        }
+        if(obj.phone){
+            obj.phone = parseInt(obj.phone)
+        }
+        try {
+            const config = {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              };
+              
+            const response = await api.patch(`/users/${+decoded.sub}`, obj, config);
+            toast.success('Edição realizada com sucesso!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                });
+        } catch (error) {
+            console.error(error);
+            toast.error('Ops! Algo deu errado', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                });
+        }
+        }
     
         return(
         <>  
@@ -67,24 +119,23 @@ export function UserPage(){
             <div className="hidden" onClick={()=>{fecharModal?.()}}></div>
                 <Header/>
                 <Container>
-                    <form className="modal">
+                    <form className="modal" onSubmit={handleSubmit(onSubmitFunctionRegister)}>
                         <h3>Altere suas informações</h3>
-                        <input type="email" placeholder="Altere aqui seu email"/>
-                        <input type="text" placeholder="Altere aqui sua bio"/>
-                        <input type="text" placeholder="Altere aqui sua imagem de perfil"/>
-                        <input type="number" placeholder="Altere aqui seu telefone"/>
-                        <button>Editar</button>
+                        <input type="email" placeholder="Altere aqui seu email" {...register("email")}/>
+                        <input type="text" placeholder="Altere aqui sua bio" {...register("bio")}/>
+                        <input type="text" placeholder="Altere aqui sua imagem de perfil" {...register("img")}/>
+                        <input type="number" placeholder="Altere aqui seu telefone" {...register("phone")}/>
+                        <button type="submit">Editar</button>
                     </form>
                     <Box>
                         <User>
                             <div>
-                                {/* <img src={users.img} alt="userImg"/> */}
-                                <img src="https://i.pinimg.com/564x/95/f6/70/95f67045c76fd22fa4bb2589efbfaf72--bartenders-apocalypse.jpg" alt="userImage" />
+                                <img src={users ? users.img: ""} alt="userImage" />
                                 <h2>{users ? <h2>{users.name}</h2> : "Bob o barman"}</h2>
                             </div>
                             <div>
                                 <button className="btnEdit" onClick={()=>{modal?.()}}>
-                                    <img src="https://cdn-icons-png.flaticon.com/512/1860/1860115.png" alt="editUser" />
+                                    <img src= "https://cdn-icons-png.flaticon.com/512/1860/1860115.png" alt="editUser" />
                                 </button>
                             </div>
                             
@@ -93,35 +144,40 @@ export function UserPage(){
                             <h2>Bio</h2>
                         </div>
                         <div className="address">
-                            <p>Olá sou um barman e estou precisando de pessoas para me ajudar com minha taverna, entre em contato se tiver interesse, o pagamento é alto porém as responsabilidades também</p>
+                            <p>{users? users.bio: ""}</p>
                         </div>
                         <Contacts>
                             <h2>Seus Contatos</h2>
                             <div>
-                                <div>
-                                    <img src="https://preview.redd.it/some-supermutant-orc-token-1-2-v0-292lbuq5xm591.png?width=256&format=png&auto=webp&s=75c0b7c1a94dc46506dff77397f90e490b1f80a5" alt="usuario" />
-                                </div>
-                                <div className="info">
-                                    <h3>
-                                        Marco Aurélio
-                                    </h3>
-                                    <br />
-                                    <span>
-                                        21980344732
-                                    </span>
-                                    <br />
-                                    <p>
-                                    Olá! Me chamo Marco Aurélio, e sou um orc que presta serviços na sua região. Com minha força e habilidade, posso ajudar em diversas tarefas.
-                                    Posso, por exemplo, oferecer serviços de limpeza pesada, como limpar galpões, pátios e jardins. Além disso, sou habilidoso com trabalhos manuais, como carpintaria e reparos em geral.
-                                    </p>
-                                    <br />
-                                    <p>
-                                        marcoaurelio@gmail.com
-                                    </p>
-                                </div>
-                                <div>
-                                    <button>X</button>
-                                </div>
+                                {users?.contacts.map( (contact) => {
+                                    return(
+                                    <div className="contatos">
+                                        <div>
+                                            <img src={contact.src} alt="usuario" />
+                                        </div>
+                                        <div className="info">
+                                            <h3>
+                                            {contact.name}
+                                            </h3>
+                                            <br />
+                                            <span>
+                                            {contact.phone}
+                                            </span>
+                                            <br />
+                                            <p>
+                                            {contact.bio}
+                                            </p>
+                                            <br />
+                                            <p>
+                                            {contact.email}
+                                            </p>
+                                        </div>
+                                        <div div className="contatos">
+                                            <button onClick={()=>{removerContato(contact.id)}}>X</button>
+                                        </div>
+                                    </div>
+                                    )
+                                })}
                             </div>
                             
                         </Contacts>

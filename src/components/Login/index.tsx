@@ -35,8 +35,8 @@ export function LoginPage(){
                 draggable: true,
                 progress: undefined,
                 }); 
-                localStorage.setItem("Token", response.data.access); 
-                navigate("/")
+                localStorage.setItem("Token", response.data.token); 
+                /* navigate("/") */
         } catch (error) {
             console.error(error);
             toast.error('Ops! E-mail ou senha inválidos', {

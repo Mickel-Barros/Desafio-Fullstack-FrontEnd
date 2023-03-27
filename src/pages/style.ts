@@ -3,7 +3,6 @@ import styled from "styled-components";
 export const Contacts = styled.div`
     background-color: white;
     border-top: 1px solid rgba(0, 0, 0, 0.5);
-    margin-top: 50px;
     display: flex;
     width: 380px;
     margin: 10px auto;
@@ -20,6 +19,7 @@ export const Contacts = styled.div`
     .info{
         display: flex; 
         flex-direction: column;
+        width: 100%;
     }
     span{
         margin-left: 15px;
